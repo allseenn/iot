@@ -49,6 +49,8 @@ password_file /mosquitto/config/password.txt
 log_dest file /mosquitto/log/mosquitto.log
 EOF
 
+touch ~/mosquitto/log/mosquitto.log
+
 cat > ~/mosquitto/config/password.txt <<EOF
 IoT:$7$101$bqmZHOS+GEQNUB/C$Keg/O8KexUeXqLsa1SIOwwa3TXZDlCjcsOSLAinU4zXb/wM9bN1Tqe7y1SlmrPzLmmP6lpYY+KTkA4Al9yrAQw==
 EOF
