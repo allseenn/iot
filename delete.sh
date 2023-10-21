@@ -12,7 +12,7 @@ docker rmi $(docker images | grep node-red | awk '{ print $3}')
 docker rm $(docker ps -a | grep grafana-oss | awk '{ print $1}') -f
 docker rmi $(docker images | grep grafana | awk '{ print $3}')
 rm -rf ~/grafana
-rm -rf ~/influxdb
+rm -rf ~/influxdb2
 rm -rf ~/mosquitto
 rm -rf ~/node-red
 rm -rf ~/telegraf

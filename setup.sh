@@ -1,5 +1,35 @@
 #!/bin/bash
+LOC_IP=$(ip route get 1 | awk '{print $7}' | head -1)
 PUB_IP=$(wget -qO- ifconfig.me)
+DOCKER_VERSION=$(docker --version | awk '{print $3}' | cut -d '.' -f1)
+if [ -z "$DOCKER_VERSION" ] || [ "$(echo $DOCKER_VERSION | cut -d '.' -f1)" -lt "24" ]; then
+    echo "Установка или обновление Docker..."
+
+    # Удаляем старые версии Docker
+    for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
+        sudo apt-get remove -y $pkg
+    done
+
+    # Устанавливаем необходимые пакеты
+    sudo apt-get update
+    sudo apt-get -y install ca-certificates wget curl gnupg 
+
+    # Устанавливаем ключи и добавляем репозиторий Docker
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    # Обновляем пакеты и устанавливаем Docker
+    sudo apt-get update
+    sudo apt-get -y install git docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    echo "Docker успешно установлен или обновлен."
+else
+    echo "У вас уже установлена актуальная версия Docker."
+fi
+
 mkdir -m 777 -p ~/mosquitto/config && \
 mkdir -m 777 -p ~/mosquitto/data && \
 mkdir -m 777 -p ~/mosquitto/log && \
@@ -14,12 +44,13 @@ mkdir -m 777 -p ~/wireguard/config
 
 cat > ~/mosquitto/config/mosquitto.conf <<EOF
 listener 1883
-allow_anonymous false
+allow_anonymous true
 password_file /mosquitto/config/password.txt
+log_dest file /mosquitto/log/mosquitto.log
 EOF
 
 cat > ~/mosquitto/config/password.txt <<EOF
-IoT:$7$101$aCqLHE29HaTi3vZ0$+w/o+7nS64+P3MbNIRawiNUHBX/+4Uz4W1t5Fu44C0irXfK5HynzD58DOU0ASdCPb50r8+9yr8R1F9h9YTupzA==
+IoT:$7$101$bqmZHOS+GEQNUB/C$Keg/O8KexUeXqLsa1SIOwwa3TXZDlCjcsOSLAinU4zXb/wM9bN1Tqe7y1SlmrPzLmmP6lpYY+KTkA4Al9yrAQw==
 EOF
 
 cat > ~/node-red/data/settings.js <<EOF
@@ -82,46 +113,38 @@ module.exports = {
 }
 EOF
 
-cat > ~/influxdb2/conf/config.yml <<EOF
-influxdb:
-  reporting-disabled: false
-  bind-address: ":8086"
-  log-level: info
-
-  auth:
-    admin:
-      username: admin
-      password: students
-      token: MbHT00nM2ucQNEwInmu8uWI7r-MGtnYyspyXrI0AF1FmjaTaq8bF3ZPSjS82utVx-NnxGsi19Upk__QSlX5TBA==
-EOF
-
 cat > ~/telegraf/conf/telegraf.conf <<EOF
 [agent]
-interval = "3s"
-round_interval = true
-metric_batch_size = 1000
-metric_buffer_limit = 10000
-collection_jitter = "0s"
-flush_interval = "3s"
-flush_jitter = "0s"
-precision = ""
-hostname = ""
-omit_hostname = false
+ interval = "3s"
+ round_interval = true
+ metric_batch_size = 1000
+ metric_buffer_limit = 10000
+ collection_jitter = "0s"
+ flush_interval = "3s"
+ flush_jitter = "0s"
+ precision = ""
+ hostname = ""
+ omit_hostname = false
+
 [[outputs.influxdb_v2]]
-urls = ["http://$PUB_IP:8086"]
-token = "!copy_token_here!"
-organization = "IoT"
-bucket = "IoT"
+  urls = ["http://$LOC_IP:8086"]
+  token = "kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg=="
+  organization = "IoT"
+  bucket = "IoT"
 [[inputs.mqtt_consumer]]
-servers = ["tcp://$PUB_IP:1883"]
-topics = ["#"]
-username = "IoT"
-password = "students"
-data_format = "value"
-data_type = "float"
+  servers = ["tcp://$LOC_IP:1883"]
+  topics = ["#"]
+  username = "IoT"
+  password = "students"
+  data_format = "value"
+  data_type = "float"
+
+[[inputs.docker]]
+  endpoint = "unix:///var/run/docker.sock"
+
 EOF
 
-cat > docker-compose.yml <<EOF
+cat > ~/docker-compose.yml <<EOF
 version: "2"
 services:
   influxdb:
@@ -129,6 +152,12 @@ services:
     image: influxdb:latest
     environment:
       - TZ=Europe/Moscow
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=students
+      - DOCKER_INFLUXDB_INIT_ORG=IoT
+      - DOCKER_INFLUXDB_INIT_BUCKET=IoT
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg==
     ports:
       - "8086:8086"
     volumes:
@@ -181,8 +210,8 @@ services:
     ports:
       - "80:3000"
     volumes:
-      - ~/grafana/data:/var/lib/grafana
-      - ~/grafana/log:/var/log/grafana
+      - ~/grafana/data:/var/lib/grafana/
+      - ~/grafana/log:/var/log/grafana/
       - ~/grafana/conf/:/etc/grafana/
     links:
       - influxdb
@@ -195,7 +224,7 @@ services:
     environment:
       - TZ=Europe/Moscow
     volumes:
-      - ~/mosquitto/:/mosquitto
+      - ~/mosquitto/:/mosquitto/
     ports:
       - 1883:1883
     networks:
@@ -221,5 +250,8 @@ networks:
   telegraf-net:
 EOF
 
-docker compose up -d
+docker compose -f ~/docker-compose.yml up -d
+chow root:root ~/mosquitto/config/password.txt
+chmod 0700 ~/mosquitto/config/password.txt
+docker ps
 
