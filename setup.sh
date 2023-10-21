@@ -51,9 +51,9 @@ EOF
 
 touch ~/mosquitto/log/mosquitto.log
 
-# cat > ~/mosquitto/config/password.txt <<EOF
-# IoT:$7$101$bqmZHOS+GEQNUB/C$Keg/O8KexUeXqLsa1SIOwwa3TXZDlCjcsOSLAinU4zXb/wM9bN1Tqe7y1SlmrPzLmmP6lpYY+KTkA4Al9yrAQw==
-# EOF
+cat > ~/mosquitto/config/password.txt <<EOF
+IoT:$7$101$zd5GDt6BQEqUlbrb$EKM/ZGITEOj/KG7YtyGu27L5IruS4I1sqoaoUkFZ02VNRc3EXntiVPEdzAAWuFXTvWHd6t3RXRbqOMYiTD4svg==
+EOF
 
 cat > ~/node-red/data/settings.js <<EOF
 module.exports = {
@@ -228,7 +228,9 @@ services:
       - MQTT_PASSWORD=students
       - TZ=Europe/Moscow
     volumes:
-      - ~/mosquitto/:/mosquitto/
+      - ~/mosquitto/config:/mosquitto/config
+      - ~/mosquitto/data:/mosquitto/data
+      - ~/mosquitto/log:/mosquitto/log
     ports:
       - 1883:1883
     networks:

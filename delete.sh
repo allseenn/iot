@@ -18,5 +18,5 @@ rm -rf ~/node-red
 rm -rf ~/telegraf
 rm -rf ~/wireguard
 rm ~/docker-compose.yml
-docker network prune
+docker network prune -f
 
