@@ -51,9 +51,9 @@ EOF
 
 touch ~/mosquitto/log/mosquitto.log
 
-cat > ~/mosquitto/config/password.txt <<EOF
-IoT:$7$101$bqmZHOS+GEQNUB/C$Keg/O8KexUeXqLsa1SIOwwa3TXZDlCjcsOSLAinU4zXb/wM9bN1Tqe7y1SlmrPzLmmP6lpYY+KTkA4Al9yrAQw==
-EOF
+# cat > ~/mosquitto/config/password.txt <<EOF
+# IoT:$7$101$bqmZHOS+GEQNUB/C$Keg/O8KexUeXqLsa1SIOwwa3TXZDlCjcsOSLAinU4zXb/wM9bN1Tqe7y1SlmrPzLmmP6lpYY+KTkA4Al9yrAQw==
+# EOF
 
 cat > ~/node-red/data/settings.js <<EOF
 module.exports = {
@@ -224,6 +224,8 @@ services:
     container_name: mosquitto
     image: eclipse-mosquitto:latest
     environment:
+      - MQTT_USERNAME=IoT
+      - MQTT_PASSWORD=students
       - TZ=Europe/Moscow
     volumes:
       - ~/mosquitto/:/mosquitto/
