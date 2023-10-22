@@ -296,8 +296,7 @@ Grafana http://$LOC_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -
 NodeRed http://$LOC_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 Influx2 http://$LOC_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 " > ~/info.txt
-cat ~/info.txt
-echo "...готовлю список подключения для внешнего адреса..."
+echo "...готовлю список подключения для внутренних адресов..."
 sleep 7
 
 echo "ПАРАМЕТРЫ ДЛЯ ПОДКЛЮЧЕНИЯ ИЗВНЕ, ЕСЛИ ПРОБРОШЕНЫ ПОРТЫ
@@ -305,15 +304,10 @@ Grafana http://$PUB_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -
 NodeRed http://$PUB_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 Influx2 http://$PUB_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 " >> ~/info.txt
-echo "..готовлю инфу по парольям..."
-sleep 7
-
-echo "ВСЕ ИНФОРМАЦИЮ ПО ПОДКЛЮЧЕНИЯМ И СЛЕДУЮЩУЮ ПО ПАРОЛЯМ МОЖНО
-НАЙТИ В ДОМАШЕМ КАТАЛОГЕ В ФАЙЛЕ ~/info.txt
-"
-echo "...готовлю инфу по токенам..."
+echo "..готовлю инфу по внешним адресам..."
 
 sleep 7
+
 # GRAFANA_API_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
 # 	-d '{"name":"UniqueAPIToken", "role":"Editor"}' \
 # 	-u $USERNAME:$PASSWORD \
@@ -336,14 +330,16 @@ curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H
   }
 }'
 
+echo "..подготовливаю соединение от графаны до инфлюкса..."
+sleep 7
 
 echo "ПАРАМЕТРЫ ДЛЯ АВТОРИЗАЦИИ
 username: $USERNAME
 password: $PASSWORD
 внешний ip: $PUB_IP
 локальный ip: $LOC_IP
-API token grafana: $GRAFANA_API_TOKEN
 token influxdb: $INFLUXDB_TOKEN" >> ~/info.txt
+
 echo "...создаю подключение с графаны на инфлюкс..."
 sleep 7
 
@@ -370,10 +366,10 @@ sleep 7
 
 
 echo "...готовлю код для WireGuard..."
-sleep 15
+sleep 10
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
-catimg ~/wireguard/config/peer1/peer1.png -w 300
+catimg ~/wireguard/config/peer1/peer1.png -w 200
 echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!"
