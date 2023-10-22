@@ -229,6 +229,7 @@ services:
     image: grafana/grafana-oss:latest
     environment:
       - TZ=Europe/Moscow
+      - GF_SERVER_HTTP_PORT=3000
       - GB_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=students
     ports:
