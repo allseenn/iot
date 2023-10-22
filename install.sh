@@ -231,13 +231,11 @@ services:
       - TZ=Europe/Moscow
       - GF_SERVER_PROTOCOL=http
       - GF_SERVER_HTTP_PORT=3000
-      - GF_DATABASE_TYPE=sqlite3
       - GF_LOG_LEVEL=debug
       - GB_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=students
-      - GF_SERVER_PROTOCOL=http
-      - GF_DATABASE_TYPE=sqlite3
       - GF_DATABASE_TYPE=influxdb
+      - GF_DATABASE_TYPE=sqlite3
       - GF_DATABASE_URL=http://influxdb:8086
       - GF_DATABASE_BASIC_AUTH=false
       - GF_DATABASE_TOKEN=kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg==
