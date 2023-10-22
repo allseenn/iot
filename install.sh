@@ -42,23 +42,23 @@ mkdir -m 777 -p ~/grafana/log && \
 mkdir -m 777 -p ~/node-red/data && \
 mkdir -m 777 -p ~/wireguard/config
 
-cat > ~/grafana/conf/grafana.ini <<EOF
-[server]
-http_addr = 0.0.0.0
-http_port = 3000
-domain = localhost
+#cat > ~/grafana/conf/grafana.ini <<EOF
+#[server]
+#http_addr = 0.0.0.0
+#http_port = 3000
+#domain = localhost
 
-[database]
-type = sqlite3
-path = /var/lib/grafana/grafana.db
+#[database]
+#type = sqlite3
+#path = /var/lib/grafana/grafana.db
 
-[auth]
-disable_login_form = false
+#[auth]
+#disable_login_form = false
 
-[security]
-admin_user = admin
-admin_password = students
-EOF
+#[security]
+#admin_user = admin
+#admin_password = students
+#EOF
 
 cat > ~/mosquitto/config/mosquitto.conf <<EOF
 listener 1883
@@ -229,6 +229,8 @@ services:
     image: grafana/grafana-oss:latest
     environment:
       - TZ=Europe/Moscow
+      - GF_SERVER_PROTOCOL=http
+      - GF_DATABASE_TYPE=sqlite3
       - GF_SERVER_HTTP_PORT=3000
       - GB_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=students
