@@ -304,7 +304,7 @@ echo "ПАРАМЕТРЫ ДЛЯ ПОДКЛЮЧЕНИЯ ИЗВНЕ, ЕСЛИ ПР
 Grafana http://$PUB_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 NodeRed http://$PUB_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 Influx2 http://$PUB_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
-" > ~/info.txt
+" >> ~/info.txt
 echo "..готовлю инфу по парольям..."
 sleep 7
 
@@ -323,11 +323,11 @@ sleep 7
 # echo "...записываю инфу в файл для вывода на экран..."
 # sleep 7
 
-curl --user $USERNAME:$PASSWORD 'http://"'$LOC_IP'":3000/api/datasources' -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{
+curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{
   "name": "InfluxDB",
   "isDefault": true,
   "type": "influxdb",
-  "url": "http://'"$LOC_IP"':8086",
+  "url": "'http://$LOC_IP:8086'",
   "access": "proxy",
   "basicAuth": false,
   "jsonData": {
@@ -344,7 +344,6 @@ password: $PASSWORD
 локальный ip: $LOC_IP
 API token grafana: $GRAFANA_API_TOKEN
 token influxdb: $INFLUXDB_TOKEN" >> ~/info.txt
-cat ~/info.txt
 echo "...создаю подключение с графаны на инфлюкс..."
 sleep 7
 
@@ -374,7 +373,7 @@ echo "...готовлю код для WireGuard..."
 sleep 15
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
-catimg ~/wirguard/config/peer1/peer1.png -w 300
+catimg ~/wireguard/config/peer1/peer1.png -w 300
 echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!"
