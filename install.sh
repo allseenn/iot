@@ -314,14 +314,28 @@ echo "ВСЕ ИНФОРМАЦИЮ ПО ПОДКЛЮЧЕНИЯМ И СЛЕДУЮ�
 echo "...готовлю инфу по токенам..."
 
 sleep 7
-GRAFANA_API_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
-	-d '{"name":"UniqueAPIToken", "role":"Editor"}' \
-	-u $USERNAME:$PASSWORD \
-	http://$LOC_IP:3000/api/auth/keys | jq -r '.key')
+# GRAFANA_API_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
+# 	-d '{"name":"UniqueAPIToken", "role":"Editor"}' \
+# 	-u $USERNAME:$PASSWORD \
+# 	http://$LOC_IP:3000/api/auth/keys | jq -r '.key')
 
-INFLUXDB_URL="http://$LOC_IP:8086"
-echo "...записываю инфу в файл для вывода на экран..."
-sleep 7
+# INFLUXDB_URL="http://$LOC_IP:8086"
+# echo "...записываю инфу в файл для вывода на экран..."
+# sleep 7
+
+curl --user $USERNAME:$PASSWORD 'http://"'$LOC_IP'":3000/api/datasources' -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{
+  "name": "InfluxDB",
+  "isDefault": true,
+  "type": "influxdb",
+  "url": "http://'"$LOC_IP"':8086",
+  "access": "proxy",
+  "basicAuth": false,
+  "jsonData": {
+    "httpMode": "Bearer",
+    "token": "'"$INFLUXDB_TOKEN"'"
+  }
+}'
+
 
 echo "ПАРАМЕТРЫ ДЛЯ АВТОРИЗАЦИИ
 username: $USERNAME
@@ -334,30 +348,30 @@ cat ~/info.txt
 echo "...создаю подключение с графаны на инфлюкс..."
 sleep 7
 
-curl -X POST -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $GRAFANA_API_TOKEN" \
-        -d '{
-        "name": "InfluxDB",
-        "type": "influxdb",
-        "url": "'"$INFLUXDB_URL"'",
-        "access": "proxy",
-        "isDefault": true,
-        "database": "'"$IOT"'",
-        "basicAuth": true,
-        "basicAuthPassword": "'"$INFLUXDB_TOKEN"'",
-        "withCredentials": false,
-        "secureJsonFields": {},
-        "jsonData": {
-          "bucket": "'"$IOT"'",
-          "organization": "'"$IOT"'"
-        },
-        "readOnly": false
-        }' \
-http://$LOC_IP:3000/api/datasources
+# curl -X POST -H "Content-Type: application/json" \
+#         -H "Authorization: Bearer $GRAFANA_API_TOKEN" \
+#         -d '{
+#         "name": "InfluxDB",
+#         "type": "influxdb",
+#         "url": "'"$INFLUXDB_URL"'",
+#         "access": "proxy",
+#         "isDefault": true,
+#         "database": "'"$IOT"'",
+#         "basicAuth": true,
+#         "basicAuthPassword": "'"$INFLUXDB_TOKEN"'",
+#         "withCredentials": false,
+#         "secureJsonFields": {},
+#         "jsonData": {
+#           "bucket": "'"$IOT"'",
+#           "organization": "'"$IOT"'"
+#         },
+#         "readOnly": false
+#         }' \
+# http://$LOC_IP:3000/api/datasources
 
 
 echo "...готовлю код для WireGuard..."
-sleep 7
+sleep 15
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
 catimg ~/wirguard/config/peer1/peer1.png -w 300
