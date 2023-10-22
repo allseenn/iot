@@ -42,8 +42,28 @@ mkdir -m 777 -p ~/grafana/log && \
 mkdir -m 777 -p ~/node-red/data && \
 mkdir -m 777 -p ~/wireguard/config
 
+cat > ~/grafana/conf/grafana.ini <<EOF
+[server]
+http_addr = 0.0.0.0
+http_port = 3000
+domain = localhost
+
+[database]
+type = sqlite3
+path = /var/lib/grafana/grafana.db
+
+[auth]
+disable_login_form = false
+
+[security]
+admin_user = admin
+admin_password = students
+EOF
+
 cat > ~/mosquitto/config/mosquitto.conf <<EOF
 listener 1883
+persistence true
+persistence_location /mosquitto/data/
 allow_anonymous true
 password_file /mosquitto/config/password.txt
 log_dest file /mosquitto/log/mosquitto.log
@@ -52,7 +72,7 @@ EOF
 touch ~/mosquitto/log/mosquitto.log
 
 cat > ~/mosquitto/config/password.txt <<EOF
-IoT:$7$101$zd5GDt6BQEqUlbrb$EKM/ZGITEOj/KG7YtyGu27L5IruS4I1sqoaoUkFZ02VNRc3EXntiVPEdzAAWuFXTvWHd6t3RXRbqOMYiTD4svg==
+admin:\$7\$101\$6DNQoUH7oXD1MS76\$SlOUlbz5SG3sxdHOr4mJwE9KzZmxeXQmh2IOdapsI7xYASYjajCVUA5ECD+SXGWfeQFPBvYoLkWMH/WpEIZjDg==
 EOF
 
 cat > ~/node-red/data/settings.js <<EOF
@@ -63,7 +83,7 @@ module.exports = {
     	type: "credentials",
     	users: [{
     		username: "admin",
-    		password: "$2b$08$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
+    		password: "\$2b\$08\$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
     		}]
     	},
     uiPort: process.env.PORT || 1880,
@@ -136,7 +156,7 @@ cat > ~/telegraf/conf/telegraf.conf <<EOF
 [[inputs.mqtt_consumer]]
   servers = ["tcp://$LOC_IP:1883"]
   topics = ["#"]
-  username = "IoT"
+  username = "admin"
   password = "students"
   data_format = "value"
   data_type = "float"
@@ -224,8 +244,6 @@ services:
     container_name: mosquitto
     image: eclipse-mosquitto:latest
     environment:
-      - MQTT_USERNAME=IoT
-      - MQTT_PASSWORD=students
       - TZ=Europe/Moscow
     volumes:
       - ~/mosquitto/config:/mosquitto/config
