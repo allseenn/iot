@@ -326,7 +326,10 @@ curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H
   "basicAuth": false,
   "jsonData": {
     "httpMode": "Bearer",
-    "token": "'"$INFLUXDB_TOKEN"'"
+    "version": "Flux",
+    "token": "'"$INFLUXDB_TOKEN"'",
+    "organization": "'"$ORG"'",
+    "defaultBucket": "'"$BUCKET"'"
   }
 }'
 
@@ -369,7 +372,7 @@ echo "...готовлю код для WireGuard..."
 sleep 10
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
-catimg ~/wireguard/config/peer1/peer1.png -w 200
+catimg ~/wireguard/config/peer1/peer1.png -w 100
 echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!
