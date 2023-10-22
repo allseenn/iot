@@ -229,8 +229,10 @@ services:
     image: grafana/grafana-oss:latest
     environment:
       - TZ=Europe/Moscow
+      - GB_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=students
     ports:
-      - "80:3000"
+      - "3000:3000"
     volumes:
       - ~/grafana/data:/var/lib/grafana/
       - ~/grafana/log:/var/log/grafana/
