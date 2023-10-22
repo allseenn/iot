@@ -327,9 +327,11 @@ curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H
   "jsonData": {
     "httpMode": "Bearer",
     "version": "Flux",
-    "token": "'"$INFLUXDB_TOKEN"'",
     "organization": "'"$ORG"'",
     "defaultBucket": "'"$BUCKET"'"
+  },
+  "secureJsonData": {
+    "token": "'"$INFLUXDB_TOKEN"'"
   }
 }'
 
