@@ -1,6 +1,12 @@
 #!/bin/bash
 LOC_IP=$(ip route get 1 | awk '{print $7}' | head -1)
 PUB_IP=$(wget -qO- ifconfig.me)
+ALL_IP=0.0.0.0
+USERNAME=admin
+PASSWORD=students
+ORG=IoT
+BUCKET=IoT
+INFLUXDB_TOKEN="kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg=="
 DOCKER_VERSION=$(docker --version | awk '{print $3}' | cut -d '.' -f1)
 if [ -z "$DOCKER_VERSION" ] || [ "$(echo $DOCKER_VERSION | cut -d '.' -f1)" -lt "24" ]; then
     echo "Установка или обновление Docker..."
@@ -29,7 +35,9 @@ if [ -z "$DOCKER_VERSION" ] || [ "$(echo $DOCKER_VERSION | cut -d '.' -f1)" -lt 
 else
     echo "У вас уже установлена актуальная версия Docker."
 fi
-
+clear
+apt -y install jq curl wget catimg
+clear
 mkdir -m 777 -p ~/mosquitto/config && \
 mkdir -m 777 -p ~/mosquitto/data && \
 mkdir -m 777 -p ~/mosquitto/log && \
@@ -42,23 +50,30 @@ mkdir -m 777 -p ~/grafana/log && \
 mkdir -m 777 -p ~/node-red/data && \
 mkdir -m 777 -p ~/wireguard/config
 
-#cat > ~/grafana/conf/grafana.ini <<EOF
-#[server]
-#http_addr = 0.0.0.0
-#http_port = 3000
-#domain = localhost
+cat > ~/grafana/conf/grafana.ini <<EOF
+[server]
+http_addr = $ALL_IP
+protocol = http
+http_port = 3000
+
+[log]
+level = debug
+
+[security]
+admin_user = $USERNAME
+admin_password = $PASSWORD
 
 #[database]
-#type = sqlite3
-#path = /var/lib/grafana/grafana.db
+#type = influxdb
+#url = $LOC_IP
+#basic_auth = false
+#token = kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg==
 
-#[auth]
-#disable_login_form = false
+#[influxdb]
+#organization = $ORG
+#bucket = $BUCKET
 
-#[security]
-#admin_user = admin
-#admin_password = students
-#EOF
+EOF
 
 cat > ~/mosquitto/config/mosquitto.conf <<EOF
 listener 1883
@@ -72,7 +87,7 @@ EOF
 touch ~/mosquitto/log/mosquitto.log
 
 cat > ~/mosquitto/config/password.txt <<EOF
-admin:\$7\$101\$6DNQoUH7oXD1MS76\$SlOUlbz5SG3sxdHOr4mJwE9KzZmxeXQmh2IOdapsI7xYASYjajCVUA5ECD+SXGWfeQFPBvYoLkWMH/WpEIZjDg==
+$USERNAME:\$7\$101\$6DNQoUH7oXD1MS76\$SlOUlbz5SG3sxdHOr4mJwE9KzZmxeXQmh2IOdapsI7xYASYjajCVUA5ECD+SXGWfeQFPBvYoLkWMH/WpEIZjDg==
 EOF
 
 cat > ~/node-red/data/settings.js <<EOF
@@ -82,7 +97,7 @@ module.exports = {
     adminAuth: {
     	type: "credentials",
     	users: [{
-    		username: "admin",
+    		username: "$USERNAME",
     		password: "\$2b\$08\$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
     		}]
     	},
@@ -150,14 +165,14 @@ cat > ~/telegraf/conf/telegraf.conf <<EOF
 
 [[outputs.influxdb_v2]]
   urls = ["http://$LOC_IP:8086"]
-  token = "kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg=="
-  organization = "IoT"
-  bucket = "IoT"
+  token = "$INFLUXDB_TOKEN"
+  organization = "$ORG"
+  bucket = "$BUCKET"
 [[inputs.mqtt_consumer]]
   servers = ["tcp://$LOC_IP:1883"]
   topics = ["#"]
-  username = "admin"
-  password = "students"
+  username = "$USERNAME"
+  password = "$PASSWORD"
   data_format = "value"
   data_type = "float"
 
@@ -175,11 +190,11 @@ services:
     environment:
       - TZ=Europe/Moscow
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=students
-      - DOCKER_INFLUXDB_INIT_ORG=IoT
-      - DOCKER_INFLUXDB_INIT_BUCKET=IoT
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg==
+      - DOCKER_INFLUXDB_INIT_USERNAME=$USERNAME
+      - DOCKER_INFLUXDB_INIT_PASSWORD=$PASSWORD
+      - DOCKER_INFLUXDB_INIT_ORG=$ORG
+      - DOCKER_INFLUXDB_INIT_BUCKET=$BUCKET
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=$INFLUXDB_TOKEN
     ports:
       - "8086:8086"
     volumes:
@@ -229,24 +244,12 @@ services:
     image: grafana/grafana-oss:latest
     environment:
       - TZ=Europe/Moscow
-      - GF_SERVER_PROTOCOL=http
-      - GF_SERVER_HTTP_PORT=3000
-      - GF_LOG_LEVEL=debug
-      - GB_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=students
-      - GF_DATABASE_TYPE=influxdb
-      - GF_DATABASE_TYPE=sqlite3
-      - GF_DATABASE_URL=http://influxdb:8086
-      - GF_DATABASE_BASIC_AUTH=false
-      - GF_DATABASE_TOKEN=kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg==
-      - GF_DATABASE_ORG=IoT
-      - GF_DATABASE_BUCKET=IoT
     ports:
       - "3000:3000"
     volumes:
       - ~/grafana/data:/var/lib/grafana/
       - ~/grafana/log:/var/log/grafana/
-      - ~/grafana/conf/:/etc/grafana/
+      - ~/grafana/conf:/etc/grafana/
     links:
       - influxdb
     networks:
@@ -287,7 +290,74 @@ networks:
 EOF
 
 docker compose -f ~/docker-compose.yml up -d
-chow root:root ~/mosquitto/config/password.txt
-chmod 0700 ~/mosquitto/config/password.txt
-docker ps
+clear
+echo "ПАРАМЕТРЫ ДЛЯ ЛОКАЛЬНОГО ПОДКЛЮЧЕНИЯ
+Grafana http://$LOC_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+NodeRed http://$LOC_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+Influx2 http://$LOC_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+" > ~/info.txt
+cat ~/info.txt
+echo "...готовлю список подключения для внешнего адреса..."
+sleep 7
+
+echo "ПАРАМЕТРЫ ДЛЯ ПОДКЛЮЧЕНИЯ ИЗВНЕ, ЕСЛИ ПРОБРОШЕНЫ ПОРТЫ
+Grafana http://$PUB_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+NodeRed http://$PUB_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+Influx2 http://$PUB_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
+" > ~/info.txt
+echo "..готовлю инфу по парольям..."
+sleep 7
+
+echo "ВСЕ ИНФОРМАЦИЮ ПО ПОДКЛЮЧЕНИЯМ И СЛЕДУЮЩУЮ ПО ПАРОЛЯМ МОЖНО
+НАЙТИ В ДОМАШЕМ КАТАЛОГЕ В ФАЙЛЕ ~/info.txt
+"
+echo "...готовлю инфу по токенам..."
+
+sleep 7
+GRAFANA_API_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
+	-d '{"name":"UniqueAPIToken", "role":"Editor"}' \
+	-u $USERNAME:$PASSWORD \
+	http://$LOC_IP:3000/api/auth/keys | jq -r '.key')
+
+INFLUXDB_URL="http://$LOC_IP:8086"
+echo "...записываю инфу в файл для вывода на экран..."
+sleep 7
+
+echo "ПАРАМЕТРЫ ДЛЯ АВТОРИЗАЦИИ
+username: $USERNAME
+password: $PASSWORD
+внешний ip: $PUB_IP
+локальный ip: $LOC_IP
+API token grafana: $GRAFANA_API_TOKEN
+token influxdb: $INFLUXDB_TOKEN" >> ~/info.txt
+cat ~/info.txt
+echo "...создаю подключение с графаны на инфлюкс..."
+sleep 7
+
+curl -X POST -H "Content-Type: application/json" \
+	-H "Authorization: Bearer $GRAFANA_API_TOKEN" \
+	-d '{
+	"name": "InfluxDB",
+	"type": "influxdb",
+	"url": "'"$INFLUXDB_URL"'",
+	"access": "proxy",
+	"isDefault": true,
+	"database": "'"$ORG"'",
+	"basicAuthUser": "'"$USERNAME"'",
+	"basicAuthPassword": "'"$PASSWORD"'",
+	"withCredentials": true,
+	"secureJsonFields": {},
+	"jsonData": {},
+	"readOnly": false
+	}' \
+	http://192.168.1.8:3000/api/datasources
+
+echo "...готовлю код для WireGuard..."
+sleep 7
+
+echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
+catimg ~/wirguard/config/peer1/peer1.png -w 300
+echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
+
+echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!"
 
