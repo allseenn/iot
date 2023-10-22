@@ -372,5 +372,6 @@ echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
 catimg ~/wireguard/config/peer1/peer1.png -w 200
 echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
-echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!"
+echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!
+Все параметре лежат ~/info.txt"
 
