@@ -335,22 +335,26 @@ echo "...создаю подключение с графаны на инфлюк
 sleep 7
 
 curl -X POST -H "Content-Type: application/json" \
-	-H "Authorization: Bearer $GRAFANA_API_TOKEN" \
-	-d '{
-	"name": "InfluxDB",
-	"type": "influxdb",
-	"url": "'"$INFLUXDB_URL"'",
-	"access": "proxy",
-	"isDefault": true,
-	"database": "'"$ORG"'",
-	"basicAuthUser": "'"$USERNAME"'",
-	"basicAuthPassword": "'"$PASSWORD"'",
-	"withCredentials": true,
-	"secureJsonFields": {},
-	"jsonData": {},
-	"readOnly": false
-	}' \
-	http://192.168.1.8:3000/api/datasources
+        -H "Authorization: Bearer $GRAFANA_API_TOKEN" \
+        -d '{
+        "name": "InfluxDB",
+        "type": "influxdb",
+        "url": "'"$INFLUXDB_URL"'",
+        "access": "proxy",
+        "isDefault": true,
+        "database": "'"$IOT"'",
+        "basicAuth": true,
+        "basicAuthPassword": "'"$INFLUXDB_TOKEN"'",
+        "withCredentials": false,
+        "secureJsonFields": {},
+        "jsonData": {
+          "bucket": "'"$IOT"'",
+          "organization": "'"$IOT"'"
+        },
+        "readOnly": false
+        }' \
+http://$LOC_IP:3000/api/datasources
+
 
 echo "...готовлю код для WireGuard..."
 sleep 7
