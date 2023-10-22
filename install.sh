@@ -231,6 +231,7 @@ services:
       - TZ=Europe/Moscow
       - GF_SERVER_PROTOCOL=http
       - GF_DATABASE_TYPE=sqlite3
+      - GF_LOG_LEVEL=debug
       - GF_SERVER_HTTP_PORT=3000
       - GB_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=students
