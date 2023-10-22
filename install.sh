@@ -308,15 +308,6 @@ echo "..готовлю инфу по внешним адресам..."
 
 sleep 7
 
-# GRAFANA_API_TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
-# 	-d '{"name":"UniqueAPIToken", "role":"Editor"}' \
-# 	-u $USERNAME:$PASSWORD \
-# 	http://$LOC_IP:3000/api/auth/keys | jq -r '.key')
-
-# INFLUXDB_URL="http://$LOC_IP:8086"
-# echo "...записываю инфу в файл для вывода на экран..."
-# sleep 7
-
 curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{
   "name": "InfluxDB",
   "isDefault": true,
@@ -335,7 +326,7 @@ curl --user $USERNAME:$PASSWORD "http://$LOC_IP:3000/api/datasources" -X POST -H
   }
 }'
 
-echo "..подготовливаю соединение от графаны до инфлюкса..."
+echo "...подготовливаю соединение от графаны до инфлюкса..."
 sleep 7
 
 echo "ПАРАМЕТРЫ ДЛЯ АВТОРИЗАЦИИ
@@ -343,31 +334,12 @@ username: $USERNAME
 password: $PASSWORD
 внешний ip: $PUB_IP
 локальный ip: $LOC_IP
-token influxdb: $INFLUXDB_TOKEN" >> ~/info.txt
+token influxdb: $INFLUXDB_TOKEN
+Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard
+Конфиги настроки WireGuard лежат ~/wireguard/config/wg_confs/wg0.conf" >> ~/info.txt
 
-echo "...создаю подключение с графаны на инфлюкс..."
+echo "...сохраняю параметры подключения в файл ~/info.txt..."
 sleep 7
-
-# curl -X POST -H "Content-Type: application/json" \
-#         -H "Authorization: Bearer $GRAFANA_API_TOKEN" \
-#         -d '{
-#         "name": "InfluxDB",
-#         "type": "influxdb",
-#         "url": "'"$INFLUXDB_URL"'",
-#         "access": "proxy",
-#         "isDefault": true,
-#         "database": "'"$IOT"'",
-#         "basicAuth": true,
-#         "basicAuthPassword": "'"$INFLUXDB_TOKEN"'",
-#         "withCredentials": false,
-#         "secureJsonFields": {},
-#         "jsonData": {
-#           "bucket": "'"$IOT"'",
-#           "organization": "'"$IOT"'"
-#         },
-#         "readOnly": false
-#         }' \
-# http://$LOC_IP:3000/api/datasources
 
 cat ~/info.txt
 echo "...готовлю код для WireGuard..."
@@ -375,8 +347,7 @@ sleep 7
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
 catimg ~/wireguard/config/peer1/peer1.png -w 150
-echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!
-Все параметре лежат ~/info.txt"
+Все настройки и пароли лежут в файле ~/info.txt"
 
