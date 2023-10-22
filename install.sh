@@ -371,10 +371,10 @@ sleep 7
 
 cat ~/info.txt
 echo "...готовлю код для WireGuard..."
-sleep 10
+sleep 7
 
 echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
-catimg ~/wireguard/config/peer1/peer1.png -w 100
+catimg ~/wireguard/config/peer1/peer1.png -w 150
 echo "Версия WireGuard для андроида: https://play.google.com/store/search?q=wireguard"
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!
