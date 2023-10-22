@@ -367,7 +367,7 @@ sleep 7
 #         }' \
 # http://$LOC_IP:3000/api/datasources
 
-
+cat ~/info.txt
 echo "...готовлю код для WireGuard..."
 sleep 10
 
