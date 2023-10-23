@@ -98,7 +98,7 @@ module.exports = {
     	type: "credentials",
     	users: [{
     		username: "$USERNAME",
-    		password: "\$2b\$08\$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
+    		password: "$2b$08$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
     		}]
     	},
     uiPort: process.env.PORT || 1880,
