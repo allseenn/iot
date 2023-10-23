@@ -98,7 +98,7 @@ module.exports = {
     	type: "credentials",
     	users: [{
     		username: "$USERNAME",
-    		password: "\$2b\$08\$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
+    		password: "\$2b\$08\$8KNl4/HWaKxJLYiF0wBCFe596FyS8ibyxWF4hwcWJIVSPIeAaEGOu",
         permissions: "*"
     		}]
     	},
@@ -169,6 +169,7 @@ cat > ~/telegraf/conf/telegraf.conf <<EOF
   token = "$INFLUXDB_TOKEN"
   organization = "$ORG"
   bucket = "$BUCKET"
+
 [[inputs.mqtt_consumer]]
   servers = ["tcp://$LOC_IP:1883"]
   topics = ["#"]
@@ -297,7 +298,7 @@ Grafana http://$LOC_IP:$(docker ps -f name=grafana --format '{{.Ports}}' | cut -
 NodeRed http://$LOC_IP:$(docker ps -f name=node-red --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 Influx2 http://$LOC_IP:$(docker ps -f name=influxdb --format '{{.Ports}}' | cut -d ':' -f 2 | cut -d '-' -f 1)
 " > ~/info.txt
-echo "...готовлю список подключения для внутренних адресов..."
+echo "...готовлю список подключениий для внутренних адресов..."
 sleep 7
 
 echo "ПАРАМЕТРЫ ДЛЯ ПОДКЛЮЧЕНИЯ ИЗВНЕ, ЕСЛИ ПРОБРОШЕНЫ ПОРТЫ
