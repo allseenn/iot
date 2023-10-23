@@ -1,12 +1,13 @@
 #!/bin/bash
-LOC_IP=$(ip route get 1 | awk '{print $7}' | head -1)
-PUB_IP=$(wget -qO- ifconfig.me)
-ALL_IP=0.0.0.0
 USERNAME=admin
 PASSWORD=students
 ORG=IoT
 BUCKET=IoT
 INFLUXDB_TOKEN="kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg=="
+
+LOC_IP=$(ip route get 1 | awk '{print $7}' | head -1)
+PUB_IP=$(wget -qO- ifconfig.me)
+ALL_IP=0.0.0.0
 DOCKER_VERSION=$(docker --version | awk '{print $3}' | cut -d '.' -f1)
 if [ -z "$DOCKER_VERSION" ] || [ "$(echo $DOCKER_VERSION | cut -d '.' -f1)" -lt "24" ]; then
     echo "Установка или обновление Docker..."
