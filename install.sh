@@ -98,7 +98,8 @@ module.exports = {
     	type: "credentials",
     	users: [{
     		username: "$USERNAME",
-    		password: "$2b$08$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
+    		password: "\$2b\$08\$XFZjnp5xlVjiiMJPftF0WOoJuo.DbvFq1E8CnoIRdC.kOr.PQnoK6",
+        permissions: "*"
     		}]
     	},
     uiPort: process.env.PORT || 1880,
@@ -349,5 +350,5 @@ echo "QR-КОД ДЛЯ НАСТРОЙКИ WIREGUARD"
 catimg ~/wireguard/config/peer1/peer1.png -w 150
 
 echo "УСТАНОВКА И НАСТРОЙКА ЗАВЕРШЕНЫ!
-Все настройки и пароли лежут в файле ~/info.txt"
+Все настройки и пароли сохранены в файле ~/info.txt"
 
