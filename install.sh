@@ -1,6 +1,7 @@
 #!/bin/bash
 USERNAME=admin
 PASSWORD=students
+DOMEN=FILL_IT!!!!!!!
 ORG=IoT
 BUCKET=IoT
 INFLUXDB_TOKEN="kFhczFje8dRm2SXK1V9Ds7xpcJTr6wVUS881KQoUQWE-QAfcg-S-6j1FvFiSvWW0wTPlmWHCvXf_JU1hRx5rZg=="
@@ -56,6 +57,9 @@ cat > ~/grafana/conf/grafana.ini <<EOF
 http_addr = $ALL_IP
 protocol = http
 http_port = 3000
+#domain = $DOMEN
+#root_url = http://$DOMEN:3000/grafana/
+#serve_from_sub_path = true
 
 [log]
 level = debug
@@ -77,10 +81,12 @@ admin_password = $PASSWORD
 EOF
 
 cat > ~/mosquitto/config/mosquitto.conf <<EOF
-listener 1883
+listener 1883 $ALL
+allow_anonymous false
+listener 8081 $ALL
+protocol websockets
 persistence true
 persistence_location /mosquitto/data/
-allow_anonymous true
 password_file /mosquitto/config/password.txt
 log_dest file /mosquitto/log/mosquitto.log
 EOF
@@ -269,6 +275,7 @@ services:
       - ~/mosquitto/log:/mosquitto/log
     ports:
       - 1883:1883
+      - 8081:8081
     networks:
       - mosquitto-net
     restart: always
